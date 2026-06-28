@@ -1,0 +1,6 @@
+Method,Dataset,Token_Precision,Token_Recall,Token_F1,Sentence_Precision,Sentence_Recall,Sentence_F1,Projection_CSV,Eva_CSV
+IBM2,learners_three_outputs_add_ibm_only,0.9998155548724255,0.9996311777723137,0.9997233578212892,1.0,1.0,1.0,csv/IBM2_projection.csv,eva/eva_IBM2.csv
+LTP,three_outputs_learners_charpairs_textcols,0.986903705516967,0.9913019424637325,0.9890979345876075,1.0,1.0,1.0,csv/LTP_projection.csv,eva/eva_LTP.csv
+Levenshtein,three_outputs_learners_charpairs_textcols,0.9867176740627391,0.9909331202360462,0.988820904448636,1.0,1.0,1.0,csv/Levenshtein_projection.csv,eva/eva_Levenshtein.csv
+step1,learner_step1_exact_boundary_projection_v2_merge_t2s_spanlen,0.9893176167234552,0.99056429800836,0.9899405648641593,1.0,1.0,1.0,csv/step1_projection.csv,eva/eva_step1.csv
+step2,learner_step2_output_final,0.9914277813623376,0.9917629702483403,0.9915953474793725,1.0,1.0,1.0,csv/step2_projection.csv,eva/eva_step2.csv

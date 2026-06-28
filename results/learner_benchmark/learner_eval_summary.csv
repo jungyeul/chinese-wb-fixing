@@ -1,0 +1,4 @@
+Method,Paper_Name,Rows,Token_Precision,Token_Recall,Token_F1,Sentence_Precision,Sentence_Recall,Sentence_F1,Source_File
+D,Direct segmentation,1079,0.986903705516967,0.9913019424637325,0.9890979345876075,1.0,1.0,1.0,src/reproducibility/learner_projection_5methods/csv/LTP_projection.csv
+P1,Identical-character projection,1079,0.9893176167234552,0.99056429800836,0.9899405648641593,1.0,1.0,1.0,src/reproducibility/learner_projection_5methods/csv/step1_projection.csv
+P2,Similarity-based projection,1079,0.9914277813623376,0.9917629702483403,0.9915953474793725,1.0,1.0,1.0,src/reproducibility/learner_projection_5methods/csv/step2_projection.csv

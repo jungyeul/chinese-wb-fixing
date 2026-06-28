@@ -1,0 +1,2 @@
+Dataset,Method,Token_Precision,Token_Recall,Token_F1,Sentence_Precision,Sentence_Recall,Sentence_F1
+learner_step2_wo_embedding,Projected_Source,0.9896242632612967,0.9908409146791246,0.9902322152598599,1.0,1.0,1.0

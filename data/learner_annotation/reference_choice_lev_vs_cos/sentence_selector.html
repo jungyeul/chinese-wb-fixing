@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentence Target Selector</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .upload-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .file-input {
+            margin-bottom: 15px;
+        }
+        
+        .file-input input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            width: 100%;
+            background: #fafafa;
+        }
+        
+        .review-section {
+            padding: 20px;
+        }
+        
+        .sentence-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .card-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        .sentence-text {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        
+        .source-text {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .target-option {
+            background: #f3e5f5;
+            border: 2px solid #9c27b0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            margin: 15px 0;
+        }
+        
+        .target-option:hover {
+            background: #e1bee7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .target-option.custom {
+            background: #fff8e1;
+            border-color: #ff9800;
+        }
+        
+        .target-option.custom:hover {
+            background: #ffecb3;
+        }
+        
+        .target-option.selected {
+            background: #c8e6c9;
+            border-color: #4caf50;
+        }
+        
+        .custom-input {
+            width: 100%;
+            min-height: 60px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            line-height: 1.6;
+            resize: vertical;
+            margin-top: 8px;
+        }
+        
+        .custom-input:focus {
+            outline: none;
+            border-color: #ff9800;
+            box-shadow: 0 0 5px rgba(255, 152, 0, 0.3);
+        }
+        
+        .target-option::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #9c27b0;
+            border-radius: 50%;
+            background: white;
+        }
+        
+        .target-option.selected::before {
+            background: #4caf50;
+            border-color: #4caf50;
+        }
+        
+        .target-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .option-label {
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .auto-selected {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .auto-label {
+            color: #4caf50;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .export-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn.warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+        
+        .progress {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .warning-text {
+            color: #f57c00;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3e0;
+            border-radius: 5px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chinese Sentence Target Selector</h1>
+            <p>Review and select the best target sentences for your data</p>
+        </div>
+        
+        <div class="upload-section">
+            <div class="file-input">
+                <label for="csvFile">Upload your CSV file:</label>
+                <input type="file" id="csvFile" accept=".csv" />
+            </div>
+            <button class="btn" onclick="loadSampleData()">Use Sample Data</button>
+        </div>
+        
+        <div id="reviewSection" class="review-section hidden">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">Total Rows</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="needsReviewCount">0</div>
+                    <div class="stat-label">Need Review</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="completedCount">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+            
+            <div id="sentenceCards"></div>
+        </div>
+        
+        <div class="export-section">
+            <button class="btn" id="exportBtn" onclick="exportResults()">
+                Export Current Results
+            </button>
+            <button class="btn warning" id="exportCompleteBtn" onclick="exportResults()">
+                Export Complete Results Only
+            </button>
+            <div id="exportWarning" class="warning-text hidden">
+                ⚠️ Some sentences haven't been reviewed yet. Unreviewed sentences will use the source text as the final target.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let csvData = [];
+        let selections = {};
+        
+        // Function to highlight differences between two texts
+        function highlightDifferences(text1, text2) {
+            if (!text1 || !text2) return { text1: text1 || '', text2: text2 || '' };
+            
+            // Simple character-by-character comparison for Chinese text
+            const chars1 = Array.from(text1);
+            const chars2 = Array.from(text2);
+            const maxLen = Math.max(chars1.length, chars2.length);
+            
+            let highlighted1 = '';
+            let highlighted2 = '';
+            
+            for (let i = 0; i < maxLen; i++) {
+                const char1 = chars1[i] || '';
+                const char2 = chars2[i] || '';
+                
+                if (char1 !== char2) {
+                    highlighted1 += char1 ? `<span style="background: #ffcdd2; color: #c62828; font-weight: bold;">${char1}</span>` : '';
+                    highlighted2 += char2 ? `<span style="background: #c8e6c9; color: #2e7d32; font-weight: bold;">${char2}</span>` : '';
+                } else {
+                    highlighted1 += char1;
+                    highlighted2 += char2;
+                }
+            }
+            
+            return { text1: highlighted1, text2: highlighted2 };
+        }
+        
+        // Advanced diff function using dynamic programming for better word-level differences
+        function getWordDiff(source, target) {
+            if (!source || !target) return { source: source || '', target: target || '' };
+            
+            // For Chinese text, we'll use character-level comparison but group consecutive changes
+            const sourceChars = Array.from(source);
+            const targetChars = Array.from(target);
+            
+            // Simple LCS-based diff
+            const dp = Array(sourceChars.length + 1).fill(null).map(() => 
+                Array(targetChars.length + 1).fill(0)
+            );
+            
+            // Fill DP table
+            for (let i = 1; i <= sourceChars.length; i++) {
+                for (let j = 1; j <= targetChars.length; j++) {
+                    if (sourceChars[i-1] === targetChars[j-1]) {
+                        dp[i][j] = dp[i-1][j-1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                    }
+                }
+            }
+            
+            // Backtrack to find differences
+            let i = sourceChars.length, j = targetChars.length;
+            let sourceResult = '', targetResult = '';
+            
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && sourceChars[i-1] === targetChars[j-1]) {
+                    sourceResult = sourceChars[i-1] + sourceResult;
+                    targetResult = targetChars[j-1] + targetResult;
+                    i--; j--;
+                } else if (i > 0 && (j === 0 || dp[i-1][j] >= dp[i][j-1])) {
+                    sourceResult = `<span style="background: #ffcdd2; color: #c62828; font-weight: bold; text-decoration: line-through;">${sourceChars[i-1]}</span>` + sourceResult;
+                    targetResult = `<span style="background: #fff3e0; color: #f57c00;">⌐</span>` + targetResult;
+                    i--;
+                } else {
+                    sourceResult = `<span style="background: #fff3e0; color: #f57c00;">⌐</span>` + sourceResult;
+                    targetResult = `<span style="background: #c8e6c9; color: #2e7d32; font-weight: bold;">${targetChars[j-1]}</span>` + targetResult;
+                    j--;
+                }
+            }
+            
+            return { source: sourceResult, target: targetResult };
+        }
+        
+        // Sample data matching your format
+        const sampleData = [
+            {
+                id: 1,
+                source: "因为在冰箱里没什么东西也做很好吃的菜。",
+                cosine_target: "即使在冰箱里没什么东西也能做很好吃的菜。",
+                levenshtein_target: "即使在冰箱里没什么东西也能做很好吃的菜。",
+                is_same: "True"
+            },
+            {
+                id: 2,
+                source: "再说，他们可能以为自己吸烟时对别人带来的不便和不舒服也不可能很大。",
+                cosine_target: "再说，他们可能以为自己吸烟时给别人带来的不便和不舒服也不可能很大。",
+                levenshtein_target: "再说，他们可能以为自己吸烟时给别人带来的不便和不舒服也不可能很大。",
+                is_same: "True"
+            },
+            {
+                id: 3,
+                source: "这样我们在生活当中没有了跟男生接触的机会，总会有一天离开学校的，我们那时肯定会遇到到底怎样与男人交流、沟通的问题了。",
+                cosine_target: "这样我们在生活当中没有了跟男生接触的机会，等有一天离开学校的时候，我们肯定会遇到到底应该怎样与男人交流、沟通的问题。",
+                levenshtein_target: "这样我们在生活当中没有了跟男生接触的机会，我们总会有一天离开学校的，我们那时肯定会遇到到底怎样与男人交流、沟通的问题。",
+                is_same: "False"
+            },
+            {
+                id: 4,
+                source: "我不愿意这么过分的喜欢歌手。",
+                cosine_target: "我不愿意这么过分地喜欢歌手。",
+                levenshtein_target: "我不愿意这么过分地喜欢歌手。",
+                is_same: "True"
+            },
+            {
+                id: 5,
+                source: "学生大概做飞机去北京。",
+                cosine_target: "学生大概坐飞机去北京。",
+                levenshtein_target: "学生大概坐飞机去北京。",
+                is_same: "True"
+            }
+        ];
+        
+        function loadSampleData() {
+            csvData = sampleData;
+            processData();
+            document.getElementById('reviewSection').classList.remove('hidden');
+        }
+        
+        function processData() {
+            selections = {};
+            
+            // Auto-select for is_same = True
+            csvData.forEach(row => {
+                if (row.is_same === "True" || row.is_same === true) {
+                    selections[row.id] = {
+                        finalTarget: row.cosine_target || row.levenshtein_target,
+                        selectedType: 'auto'
+                    };
+                }
+            });
+            
+            renderCards();
+            updateStats();
+        }
+        
+        function renderCards() {
+            const container = document.getElementById('sentenceCards');
+            container.innerHTML = '';
+            
+            // Only show rows that need review (is_same = False)
+            const reviewRows = csvData.filter(row => row.is_same === "False" || row.is_same === false);
+            
+            if (reviewRows.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><h3>All sentences are automatically processed!</h3><p>No manual review needed. You can export the results directly.</p></div>';
+                return;
+            }
+            
+            reviewRows.forEach(row => {
+                const card = document.createElement('div');
+                card.className = 'sentence-card';
+                
+                const isSelected = selections[row.id];
+                
+                // Get highlighted differences
+                const cosineDiff = getWordDiff(row.source, row.cosine_target);
+                const levenshteinDiff = getWordDiff(row.source, row.levenshtein_target);
+                
+                card.innerHTML = `
+                    <div class="card-header">ID: ${row.id}</div>
+                    <div class="card-content">
+                        <div class="sentence-text source-text">
+                            <strong>Source:</strong><br>
+                            ${row.source}
+                        </div>
+                        
+                        <div class="target-option ${isSelected && isSelected.selectedType === 'cosine' ? 'selected' : ''}" 
+                             onclick="selectTarget(${row.id}, 'cosine')">
+                            <div class="option-label">Cosine Similarity Target:</div>
+                            <div style="font-size: 14px;">
+                                <strong>Source:</strong> ${cosineDiff.source}<br>
+                                <strong>Target:</strong> ${cosineDiff.target}
+                            </div>
+                        </div>
+                        
+                        <div class="target-option ${isSelected && isSelected.selectedType === 'levenshtein' ? 'selected' : ''}" 
+                             onclick="selectTarget(${row.id}, 'levenshtein')">
+                            <div class="option-label">Levenshtein Target:</div>
+                            <div style="font-size: 14px;">
+                                <strong>Source:</strong> ${levenshteinDiff.source}<br>
+                                <strong>Target:</strong> ${levenshteinDiff.target}
+                            </div>
+                        </div>
+                        
+                        <div class="target-option custom ${isSelected && isSelected.selectedType === 'custom' ? 'selected' : ''}" 
+                             onclick="selectTarget(${row.id}, 'custom')">
+                            <div class="option-label">Custom Target (Edit Your Own):</div>
+                            <textarea 
+                                id="custom-${row.id}" 
+                                class="custom-input" 
+                                placeholder="Enter your custom target sentence..."
+                                oninput="updateCustomTarget(${row.id})"
+                                onclick="event.stopPropagation()"
+                            >${isSelected && isSelected.selectedType === 'custom' ? isSelected.finalTarget : row.source}</textarea>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        function selectTarget(id, type) {
+            const row = csvData.find(r => r.id === id);
+            if (!row) return;
+            
+            let target;
+            if (type === 'cosine') {
+                target = row.cosine_target;
+            } else if (type === 'levenshtein') {
+                target = row.levenshtein_target;
+            } else if (type === 'custom') {
+                // For custom, we'll store the current value of the textarea
+                const textarea = document.getElementById(`custom-${id}`);
+                target = textarea ? textarea.value.trim() : row.source;
+            }
+            
+            selections[id] = {
+                finalTarget: target,
+                selectedType: type
+            };
+            
+            renderCards();
+            updateStats();
+        }
+        
+        function updateCustomTarget(id) {
+            const textarea = document.getElementById(`custom-${id}`);
+            if (!textarea) return;
+            
+            // Auto-select custom option when user types
+            const customOption = document.querySelector(`[onclick="selectTarget(${id}, 'custom')"]`);
+            if (customOption && !customOption.classList.contains('selected')) {
+                selectTarget(id, 'custom');
+            }
+            
+            // Update the selection with current text
+            if (selections[id] && selections[id].selectedType === 'custom') {
+                selections[id].finalTarget = textarea.value.trim();
+                updateStats();
+            }
+        }
+        
+        function updateStats() {
+            const total = csvData.length;
+            const needsReview = csvData.filter(row => row.is_same === "False" || row.is_same === false).length;
+            const autoProcessed = csvData.filter(row => row.is_same === "True" || row.is_same === true).length;
+            const manuallyCompleted = csvData.filter(row => 
+                (row.is_same === "False" || row.is_same === false) && selections[row.id]
+            ).length;
+            
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('needsReviewCount').textContent = needsReview;
+            document.getElementById('completedCount').textContent = autoProcessed + manuallyCompleted;
+            
+            const progress = total > 0 ? ((autoProcessed + manuallyCompleted) / total) * 100 : 0;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = Math.round(progress) + '%';
+            
+            // Update export buttons and warning
+            const exportBtn = document.getElementById('exportBtn');
+            const exportCompleteBtn = document.getElementById('exportCompleteBtn');
+            const exportWarning = document.getElementById('exportWarning');
+            
+            const allCompleted = manuallyCompleted >= needsReview;
+            
+            // Always enable the main export button
+            exportBtn.disabled = false;
+            
+            // Update button text based on completion status
+            if (allCompleted) {
+                exportBtn.textContent = 'Export Current Results (All Complete)';
+                exportCompleteBtn.style.display = 'none';
+                exportWarning.classList.add('hidden');
+            } else {
+                exportBtn.textContent = 'Export Current Results';
+                exportCompleteBtn.style.display = 'inline-block';
+                exportCompleteBtn.textContent = `Export Complete Only (${autoProcessed + manuallyCompleted}/${total})`;
+                exportWarning.classList.remove('hidden');
+            }
+        }
+        
+        function exportResults(completeOnly = false) {
+            const results = csvData.map(row => {
+                const selection = selections[row.id];
+                
+                // For complete only export, skip unreviewed rows that need review
+                if (completeOnly && (row.is_same === "False" || row.is_same === false) && !selection) {
+                    return null;
+                }
+                
+                let finalTarget;
+                let selectedType;
+                
+                if (selection) {
+                    finalTarget = selection.finalTarget;
+                    selectedType = selection.selectedType;
+                } else if (row.is_same === "False" || row.is_same === false) {
+                    // For incomplete rows, use source as final target
+                    finalTarget = row.source;
+                    selectedType = 'unreviewed';
+                } else {
+                    // Should not happen, but fallback
+                    finalTarget = row.source;
+                    selectedType = 'unknown';
+                }
+                
+                return {
+                    id: row.id,
+                    source: row.source,
+                    final_target: finalTarget,
+                    selected_type: selectedType,
+                    cosine_target: row.cosine_target || '',
+                    levenshtein_target: row.levenshtein_target || '',
+                    is_same: row.is_same
+                };
+            }).filter(row => row !== null);
+            
+            // Convert to CSV
+            const headers = ['id', 'source', 'final_target', 'selected_type', 'cosine_target', 'levenshtein_target', 'is_same'];
+            const csvContent = [
+                headers.join(','),
+                ...results.map(row => 
+                    headers.map(header => `"${(row[header] || '').toString().replace(/"/g, '""')}"`).join(',')
+                )
+            ].join('\n');
+            
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+            const suffix = completeOnly ? '_complete' : '_current';
+            link.download = `final_targets${suffix}_${timestamp}.csv`;
+            link.click();
+        }
+        
+        // Update the onclick handlers for export buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('exportBtn').onclick = () => exportResults(false);
+            document.getElementById('exportCompleteBtn').onclick = () => exportResults(true);
+        });
+        
+        // File upload handler
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                
+                // Simple CSV parsing (you might want to use a library for more complex cases)
+                const lines = csv.split('\n');
+                const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+                
+                csvData = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    const values = [];
+                    let current = '';
+                    let inQuotes = false;
+                    
+                    for (let j = 0; j < lines[i].length; j++) {
+                        const char = lines[i][j];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            values.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    values.push(current.trim());
+                    
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                        if (header === 'id') row[header] = parseInt(row[header]) || 0;
+                    });
+                    
+                    csvData.push(row);
+                }
+                
+                processData();
+                document.getElementById('reviewSection').classList.remove('hidden');
+            };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>

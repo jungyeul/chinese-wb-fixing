@@ -1,0 +1,7 @@
+pandas
+tqdm
+ltp
+python-Levenshtein
+transformers
+torch
+pypinyin

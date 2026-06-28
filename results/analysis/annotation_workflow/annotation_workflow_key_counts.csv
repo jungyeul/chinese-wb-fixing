@@ -1,0 +1,9 @@
+metric,value
+final_benchmark_rows,1079
+reference_same_automatic,765
+reference_different_human_choice,314
+final_source_type_lev,953
+final_source_type_cos,126
+levenshtein_review_rows,260
+cosine_126_review_rows,20
+cosine_source_ids_present_in_updated_ltp_file,126

@@ -1,0 +1,4 @@
+Dataset,Method,Token_Precision,Token_Recall,Token_F1,Sentence_Precision,Sentence_Recall,Sentence_F1
+three_outputs_learners_charpairs_textcols,IBM2,0.9867176740627391,0.9909331202360462,0.988820904448636,1.0,1.0,1.0
+three_outputs_learners_charpairs_textcols,LTP,0.986903705516967,0.9913019424637325,0.9890979345876075,1.0,1.0,1.0
+three_outputs_learners_charpairs_textcols,Levenshtein,0.9867176740627391,0.9909331202360462,0.988820904448636,1.0,1.0,1.0

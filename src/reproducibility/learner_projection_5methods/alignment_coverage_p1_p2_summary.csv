@@ -1,0 +1,3 @@
+method,input_file,sentences,aligned_source_chars,total_source_chars,source_coverage,source_coverage_percent,aligned_target_chars,total_target_chars,target_coverage,target_coverage_percent
+P1,src/reproducibility/learner_projection_5methods/csv/step1_projection.csv,1079,45406,48778,0.9308704743941941,93.08704743941941,45406,49698,0.9136383757897703,91.36383757897703
+P2,src/reproducibility/learner_projection_5methods/csv/step2_projection.csv,1079,46636,48778,0.9560867604247817,95.60867604247817,46636,49698,0.9383878626906516,93.83878626906515
