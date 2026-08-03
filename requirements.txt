@@ -1,0 +1,11 @@
+pandas
+numpy
+tqdm
+matplotlib
+openpyxl
+python-Levenshtein
+pypinyin
+ltp
+torch
+transformers
+sentence-transformers

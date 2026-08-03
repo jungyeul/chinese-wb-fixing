@@ -1,0 +1,68 @@
+{
+  "row_counts": {
+    "final_benchmark": 1079,
+    "final_plain_benchmark": 1079,
+    "levenshtein_segmentation_final": 1079,
+    "cosine_126_segmentation_final": 126,
+    "reference_choice_merged": 1079,
+    "levenshtein_target": 1079,
+    "cosine_target": 1079
+  },
+  "reference_selection": {
+    "cosine_and_levenshtein_same": 765,
+    "cosine_and_levenshtein_different": 314
+  },
+  "reference_choice": {
+    "final_selected_type_counts": {
+      "levenshtein": 953,
+      "cosine": 126
+    },
+    "needs_review_counts": {
+      "False": 1079
+    },
+    "annotator_selected_type_counts": {
+      "selected_type_annotator_c": {
+        "auto": 765,
+        "levenshtein": 254,
+        "cosine": 60
+      },
+      "selected_type_annotator_b": {
+        "auto": 765,
+        "levenshtein": 173,
+        "cosine": 141
+      },
+      "selected_type_annotator_a": {
+        "auto": 765,
+        "cosine": 178,
+        "levenshtein": 136
+      }
+    }
+  },
+  "final_benchmark": {
+    "source_type_counts": {
+      "lev": 953,
+      "cos": 126
+    },
+    "plain_equals_labeled_without_source_type": true
+  },
+  "cosine_source_type_relationships": {
+    "cos_source_ids_match_final_seg_cos": true,
+    "final_cos_source_text_equals_final_seg_cos": true,
+    "final_cos_target_text_equals_final_seg_lev": true,
+    "final_cos_target_compact_equals_levenshtein_target": 126,
+    "final_cos_target_compact_equals_cosine_target": 0,
+    "final_cos_source_compact_equals_raw_source": 126
+  },
+  "cosine_source_ltp_replacement_artifact": {
+    "source_ltp_updated_rows": 1079,
+    "cosine_source_rows": 126,
+    "cosine_source_ids_present_in_updated": 126,
+    "cosine_source_segmented_equals_updated_source_ltp_segmented": 126,
+    "updated_equals_construction_source_ltp_segment_with_id": true
+  },
+  "review_workbooks": {
+    "levenshtein_review_1_200_rows": 40,
+    "levenshtein_review_201_1079_rows": 220,
+    "cosine_126_review_rows": 20
+  }
+}

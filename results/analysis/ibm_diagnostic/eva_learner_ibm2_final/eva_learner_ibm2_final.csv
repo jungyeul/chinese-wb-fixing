@@ -1,0 +1,2 @@
+Dataset,Method,Gold_Column,Pred_Column,Token_Precision,Token_Recall,Token_F1,Sentence_Precision,Sentence_Recall,Sentence_F1
+learner_ibm2_final,Projected_Source,Source_Text,Projected_Source,0.9492588720093487,0.9487337103516105,0.9489962185261475,1.0,1.0,1.0

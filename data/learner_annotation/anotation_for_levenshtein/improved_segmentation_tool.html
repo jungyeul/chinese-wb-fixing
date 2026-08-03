@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese Segmentation Comparison Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .file-upload {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .upload-section {
+            flex: 1;
+        }
+
+        .upload-section label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .upload-section input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .comparison-row {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .row-header {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .row-index {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-consistent {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inconsistent {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-corrected {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-hard {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .text-comparison {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .text-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .text-label {
+            min-width: 80px;
+            font-weight: bold;
+            padding: 8px 0;
+        }
+
+        .text-content {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f9f9f9;
+            font-family: 'Microsoft YaHei', 'SimSun', monospace;
+            line-height: 1.6;
+            word-break: break-all;
+        }
+
+        .text-target {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+
+        .text-source {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .diff-highlight {
+            background: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .diff-added {
+            background: #c8e6c9;
+        }
+
+        .diff-removed {
+            background: #ffcdd2;
+        }
+
+        .correction-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .correction-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Microsoft YaHei', 'SimSun', monospace;
+            font-size: 14px;
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .correction-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .memo-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .memo-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-height: 40px;
+            resize: vertical;
+        }
+
+        .judgment-section {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .judgment-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-judgment {
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+
+        .btn-consistent {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .btn-consistent:hover {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-inconsistent {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .btn-inconsistent:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-hard {
+            background: #e2e3e5;
+            border-color: #6c757d;
+            color: #383d41;
+        }
+
+        .btn-hard:hover {
+            background: #6c757d;
+            color: white;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .navigation {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+
+        .instructions ul {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chinese Segmentation Comparison Tool</h1>
+        
+        <div class="instructions">
+            <h3>How to Use:</h3>
+            <ul>
+                <li><strong>Upload Files:</strong> Select your target and source CSV files</li>
+                <li><strong>Review Each Pair:</strong> Compare target vs source segmentation (differences are highlighted)</li>
+                <li><strong>Judge Consistency:</strong> Press Y (consistent), N (inconsistent), or H (hard to decide)</li>
+                <li><strong>Revise Anytime:</strong> You can change your judgment when revisiting any row</li>
+                <li><strong>Make Corrections:</strong> For inconsistent pairs, input the correct segmentation (source text pre-filled)</li>
+                <li><strong>Add Memos:</strong> For hard-to-decide cases, add notes for future reference</li>
+                <li><strong>Save:</strong> Use Ctrl+S to save corrections or memos</li>
+                <li><strong>Cancel:</strong> Press ESC to cancel editing corrections or memos</li>
+                <li><strong>Navigate:</strong> Use Previous/Next buttons or Ctrl+← / Ctrl+→</li>
+                <li><strong>Undo:</strong> Press "Undo Last Input" or Ctrl+Z if you make a mistake</li>
+                <li><strong>Export:</strong> Save your results when finished</li>
+            </ul>
+        </div>
+        
+        <div class="file-upload">
+            <div class="upload-section">
+                <label for="targetFile">Target CSV File:</label>
+                <input type="file" id="targetFile" accept=".csv" />
+            </div>
+            <div class="upload-section">
+                <label for="sourceFile">Source CSV File:</label>
+                <input type="file" id="sourceFile" accept=".csv" />
+            </div>
+        </div>
+
+        <div id="navigationSection" class="navigation" style="display: none;">
+            <div class="controls">
+                <button class="btn btn-primary" onclick="previousRow()">Previous</button>
+                <button class="btn btn-primary" onclick="nextRow()">Next</button>
+                <button class="btn btn-secondary" onclick="jumpToRow()">Jump to Row</button>
+                <button class="btn btn-warning" onclick="undoLastCorrection()">Undo Last Input</button>
+                <button class="btn btn-success" onclick="exportResults()">Export Results</button>
+                <span id="currentPosition"></span>
+            </div>
+        </div>
+
+        <div id="statsSection" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalRows">0</div>
+                    <div class="stat-label">Total Rows</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="consistentCount">0</div>
+                    <div class="stat-label">Consistent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="inconsistentCount">0</div>
+                    <div class="stat-label">Inconsistent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="correctedCount">0</div>
+                    <div class="stat-label">Corrected</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="hardCount">0</div>
+                    <div class="stat-label">Hard to Decide</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="processedCount">0</div>
+                    <div class="stat-label">Processed</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="comparisonContainer">
+            <div class="empty-state">
+                <h3>Please upload both CSV files to start comparison</h3>
+                <p>Make sure both files have the same structure with 'id' and segmented text columns.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let targetData = [];
+        let sourceData = [];
+        let comparisonResults = [];
+        let currentRowIndex = 0;
+        let correctionHistory = [];
+
+        // File upload handlers
+        document.getElementById('targetFile').addEventListener('change', handleTargetFile);
+        document.getElementById('sourceFile').addEventListener('change', handleSourceFile);
+
+        function handleTargetFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                readCSV(file, (data) => {
+                    targetData = data;
+                    checkReadyToCompare();
+                });
+            }
+        }
+
+        function handleSourceFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                readCSV(file, (data) => {
+                    sourceData = data;
+                    checkReadyToCompare();
+                });
+            }
+        }
+
+        function readCSV(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n').filter(line => line.trim());
+                const data = [];
+                
+                // Skip header row if it exists
+                let startIndex = 0;
+                if (lines.length > 0 && (lines[0].includes('id') || lines[0].includes('target') || lines[0].includes('source'))) {
+                    startIndex = 1;
+                }
+                
+                for (let i = startIndex; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        // More robust CSV parsing - handle the actual structure
+                        const commaIndex = line.indexOf(',');
+                        if (commaIndex !== -1) {
+                            const id = line.substring(0, commaIndex).trim();
+                            const text = line.substring(commaIndex + 1).trim();
+                            data.push({
+                                id: id,
+                                text: text
+                            });
+                        }
+                    }
+                }
+                callback(data);
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        function checkReadyToCompare() {
+            if (targetData.length > 0 && sourceData.length > 0) {
+                initializeComparison();
+            }
+        }
+
+        function initializeComparison() {
+            comparisonResults = [];
+            correctionHistory = [];
+            
+            // Create maps for easier lookup by ID
+            const targetMap = new Map();
+            const sourceMap = new Map();
+            
+            targetData.forEach(item => {
+                targetMap.set(item.id, item);
+            });
+            
+            sourceData.forEach(item => {
+                sourceMap.set(item.id, item);
+            });
+            
+            // Get all unique IDs from both datasets
+            const allIds = new Set([...targetMap.keys(), ...sourceMap.keys()]);
+            const sortedIds = Array.from(allIds).sort((a, b) => {
+                // Try to sort numerically if possible
+                const numA = parseInt(a);
+                const numB = parseInt(b);
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return numA - numB;
+                }
+                return a.localeCompare(b);
+            });
+            
+            // Create comparison results by matching IDs
+            sortedIds.forEach((id, index) => {
+                const target = targetMap.get(id) || { id: id, text: '' };
+                const source = sourceMap.get(id) || { id: id, text: '' };
+                
+                comparisonResults.push({
+                    index: index,
+                    target: target,
+                    source: source,
+                    isConsistent: null, // Will be set by user
+                    correction: null,
+                    memo: null,
+                    status: 'pending' // 'pending', 'consistent', 'inconsistent', 'hard'
+                });
+            });
+
+            currentRowIndex = 0;
+            updateStats();
+            showNavigationAndStats();
+            renderCurrentRow();
+        }
+
+        function showNavigationAndStats() {
+            document.getElementById('navigationSection').style.display = 'block';
+            document.getElementById('statsSection').style.display = 'block';
+        }
+
+        // Function to highlight differences between two texts based on segmentation
+        function highlightDifferences(target, source) {
+            // Split by spaces to get segments
+            const targetSegments = target.split(' ').filter(seg => seg.trim());
+            const sourceSegments = source.split(' ').filter(seg => seg.trim());
+            
+            // Use a simple LCS (Longest Common Subsequence) approach to find minimal differences
+            const lcs = findLCS(targetSegments, sourceSegments);
+            
+            // Mark segments that are not in the LCS
+            const targetHighlight = new Array(targetSegments.length).fill(true);
+            const sourceHighlight = new Array(sourceSegments.length).fill(true);
+            
+            // Mark LCS segments as not highlighted
+            let targetIdx = 0, sourceIdx = 0;
+            for (let item of lcs) {
+                // Find next occurrence of this segment in target
+                while (targetIdx < targetSegments.length && targetSegments[targetIdx] !== item.segment) {
+                    targetIdx++;
+                }
+                if (targetIdx < targetSegments.length) {
+                    targetHighlight[targetIdx] = false;
+                    targetIdx++;
+                }
+                
+                // Find next occurrence of this segment in source
+                while (sourceIdx < sourceSegments.length && sourceSegments[sourceIdx] !== item.segment) {
+                    sourceIdx++;
+                }
+                if (sourceIdx < sourceSegments.length) {
+                    sourceHighlight[sourceIdx] = false;
+                    sourceIdx++;
+                }
+            }
+            
+            // Build highlighted results
+            const targetResult = targetSegments.map((segment, index) => {
+                if (targetHighlight[index]) {
+                    return `<span class="diff-highlight diff-removed">${segment}</span>`;
+                }
+                return segment;
+            }).join(' ');
+            
+            const sourceResult = sourceSegments.map((segment, index) => {
+                if (sourceHighlight[index]) {
+                    return `<span class="diff-highlight diff-added">${segment}</span>`;
+                }
+                return segment;
+            }).join(' ');
+            
+            return { target: targetResult, source: sourceResult };
+        }
+        
+        // Find Longest Common Subsequence to identify minimal differences
+        function findLCS(arr1, arr2) {
+            const m = arr1.length;
+            const n = arr2.length;
+            const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
+            
+            // Build LCS table
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (arr1[i-1] === arr2[j-1]) {
+                        dp[i][j] = dp[i-1][j-1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                    }
+                }
+            }
+            
+            // Reconstruct LCS
+            const lcs = [];
+            let i = m, j = n;
+            while (i > 0 && j > 0) {
+                if (arr1[i-1] === arr2[j-1]) {
+                    lcs.unshift({segment: arr1[i-1], targetIdx: i-1, sourceIdx: j-1});
+                    i--;
+                    j--;
+                } else if (dp[i-1][j] > dp[i][j-1]) {
+                    i--;
+                } else {
+                    j--;
+                }
+            }
+            
+            return lcs;
+        }
+
+        function renderCurrentRow() {
+            if (comparisonResults.length === 0) return;
+
+            const result = comparisonResults[currentRowIndex];
+            const container = document.getElementById('comparisonContainer');
+            
+            const statusClass = result.status === 'consistent' ? 'status-consistent' : 
+                               result.status === 'inconsistent' ? 'status-inconsistent' : 
+                               result.status === 'hard' ? 'status-hard' : 'status-pending';
+            const statusText = result.status === 'consistent' ? 'Consistent' :
+                              result.status === 'inconsistent' ? 'Inconsistent' : 
+                              result.status === 'hard' ? 'Hard to Decide' : 'Pending Review';
+
+            // Highlight differences
+            let targetDisplay = result.target.text;
+            let sourceDisplay = result.source.text;
+            
+            if (result.target.text && result.source.text && result.target.text !== result.source.text) {
+                const diff = highlightDifferences(result.target.text, result.source.text);
+                targetDisplay = diff.target;
+                sourceDisplay = diff.source;
+            }
+
+            container.innerHTML = `
+                <div class="comparison-row">
+                    <div class="row-header">
+                        <div class="row-index">Row ${currentRowIndex + 1} (ID: ${result.target.id || result.source.id})</div>
+                        <div class="status-badge ${statusClass}">${statusText}</div>
+                    </div>
+                    
+                    <div class="text-comparison">
+                        <div class="text-row">
+                            <div class="text-label">Target:</div>
+                            <div class="text-content text-target">${targetDisplay}</div>
+                        </div>
+                        
+                        <div class="text-row">
+                            <div class="text-label">Source:</div>
+                            <div class="text-content text-source">${sourceDisplay}</div>
+                        </div>
+                        
+                        ${result.status === 'inconsistent' ? `
+                        <div class="text-row">
+                            <div class="text-label">Corrected:</div>
+                            <div style="flex: 1;">
+                                <div class="text-content" style="background: #d1ecf1; border-color: #0c5460;">
+                                    ${result.correction || '(No correction provided)'}
+                                </div>
+                                ${!result.showCorrectionInput ? `
+                                <button class="btn btn-warning" onclick="showCorrectionInput()" style="margin-top: 5px; padding: 4px 8px; font-size: 12px;">Revise (R)</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${result.status === 'hard' ? `
+                        <div class="text-row">
+                            <div class="text-label">Memo:</div>
+                            <div style="flex: 1;">
+                                <div class="text-content" style="background: #f8f9fa; border-color: #6c757d; font-style: italic;">
+                                    ${result.memo || '(No memo provided)'}
+                                </div>
+                                ${!result.showMemoInput ? `
+                                <button class="btn btn-warning" onclick="showMemoInput()" style="margin-top: 5px; padding: 4px 8px; font-size: 12px;">Revise (R)</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${result.status === 'pending' ? `
+                    <div class="judgment-section">
+                        <h4>Are these segmentations consistent?</h4>
+                        <div class="judgment-buttons">
+                            <button class="btn-judgment btn-consistent" onclick="markConsistent()">
+                                Y - Consistent
+                            </button>
+                            <button class="btn-judgment btn-inconsistent" onclick="markInconsistent()">
+                                N - Inconsistent
+                            </button>
+                            <button class="btn-judgment btn-hard" onclick="markHardToDecide()">
+                                H - Hard to Decide
+                            </button>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${result.status === 'inconsistent' && result.showCorrectionInput ? `
+                    <div class="correction-section">
+                        <label for="correctionInput"><strong>Edit your correction:</strong></label>
+                        <textarea id="correctionInput" class="correction-input" placeholder="Enter the correct segmentation here...">${result.correction || result.source.text}</textarea>
+                        <div class="correction-buttons">
+                            <button class="btn btn-success" onclick="saveCorrection()">Save Correction (Ctrl+S)</button>
+                            <button class="btn btn-secondary" onclick="clearCorrection()">Clear</button>
+                            <button class="btn btn-warning" onclick="hideCorrectionInput()">Cancel (ESC)</button>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${result.status === 'hard' && result.showMemoInput ? `
+                    <div class="memo-section">
+                        <label for="memoInput"><strong>Edit memo:</strong></label>
+                        <textarea id="memoInput" class="memo-input" placeholder="Add your notes about why this is hard to decide...">${result.memo || ''}</textarea>
+                        <div class="correction-buttons">
+                            <button class="btn btn-success" onclick="saveMemo()">Save Memo (Ctrl+S)</button>
+                            <button class="btn btn-secondary" onclick="clearMemo()">Clear</button>
+                            <button class="btn btn-warning" onclick="hideMemoInput()">Cancel (ESC)</button>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${result.status !== 'pending' ? `
+                    <div class="judgment-section">
+                        <h4>Revise judgment:</h4>
+                        <div class="judgment-buttons">
+                            ${result.status !== 'consistent' ? `
+                            <button class="btn-judgment btn-consistent" onclick="markConsistent()">
+                                Y - Consistent
+                            </button>
+                            ` : ''}
+                            ${result.status !== 'inconsistent' ? `
+                            <button class="btn-judgment btn-inconsistent" onclick="markInconsistent()">
+                                N - Inconsistent
+                            </button>
+                            ` : ''}
+                            ${result.status !== 'hard' ? `
+                            <button class="btn-judgment btn-hard" onclick="markHardToDecide()">
+                                H - Hard to Decide
+                            </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+
+            updateCurrentPosition();
+        }
+
+        function previousRow() {
+            if (currentRowIndex > 0) {
+                currentRowIndex--;
+                renderCurrentRow();
+                updateStats();
+            }
+        }
+
+        function nextRow() {
+            if (currentRowIndex < comparisonResults.length - 1) {
+                currentRowIndex++;
+                renderCurrentRow();
+                updateStats();
+            }
+        }
+
+        function jumpToRow() {
+            const rowNumber = prompt(`Enter row number (1-${comparisonResults.length}):`);
+            if (rowNumber) {
+                const index = parseInt(rowNumber) - 1;
+                if (index >= 0 && index < comparisonResults.length) {
+                    currentRowIndex = index;
+                    renderCurrentRow();
+                    updateStats();
+                } else {
+                    alert('Invalid row number!');
+                }
+            }
+        }
+
+        function markConsistent() {
+            const oldState = JSON.parse(JSON.stringify(comparisonResults[currentRowIndex]));
+            correctionHistory.push({ index: currentRowIndex, oldState: oldState });
+            
+            comparisonResults[currentRowIndex].status = 'consistent';
+            comparisonResults[currentRowIndex].isConsistent = true;
+            
+            renderCurrentRow();
+            updateStats();
+            
+            // Auto advance to next pending row
+            setTimeout(() => {
+                const nextPending = comparisonResults.findIndex((r, i) => 
+                    i > currentRowIndex && r.status === 'pending'
+                );
+                if (nextPending !== -1) {
+                    currentRowIndex = nextPending;
+                    renderCurrentRow();
+                    updateStats();
+                }
+            }, 500);
+        }
+
+        function showCorrectionInput() {
+            comparisonResults[currentRowIndex].showCorrectionInput = true;
+            renderCurrentRow();
+            
+            // Auto-focus the correction input
+            setTimeout(() => {
+                const correctionInput = document.getElementById('correctionInput');
+                if (correctionInput) {
+                    correctionInput.focus();
+                    correctionInput.select();
+                }
+            }, 100);
+        }
+
+        function hideCorrectionInput() {
+            comparisonResults[currentRowIndex].showCorrectionInput = false;
+            renderCurrentRow();
+        }
+
+        function showMemoInput() {
+            comparisonResults[currentRowIndex].showMemoInput = true;
+            renderCurrentRow();
+            
+            // Auto-focus the memo input
+            setTimeout(() => {
+                const memoInput = document.getElementById('memoInput');
+                if (memoInput) {
+                    memoInput.focus();
+                }
+            }, 100);
+        }
+
+        function hideMemoInput() {
+            comparisonResults[currentRowIndex].showMemoInput = false;
+            renderCurrentRow();
+        }
+
+        function markInconsistent() {
+            const oldState = JSON.parse(JSON.stringify(comparisonResults[currentRowIndex]));
+            correctionHistory.push({ index: currentRowIndex, oldState: oldState });
+            
+            comparisonResults[currentRowIndex].status = 'inconsistent';
+            comparisonResults[currentRowIndex].isConsistent = false;
+            comparisonResults[currentRowIndex].showCorrectionInput = true; // Show input when marking as inconsistent
+            
+            renderCurrentRow();
+            updateStats();
+            
+            // Auto-focus the correction input
+            setTimeout(() => {
+                const correctionInput = document.getElementById('correctionInput');
+                if (correctionInput) {
+                    correctionInput.focus();
+                    correctionInput.select(); // Select all text for easy editing
+                }
+            }, 100);
+        }
+
+        function markHardToDecide() {
+            const oldState = JSON.parse(JSON.stringify(comparisonResults[currentRowIndex]));
+            correctionHistory.push({ index: currentRowIndex, oldState: oldState });
+            
+            comparisonResults[currentRowIndex].status = 'hard';
+            comparisonResults[currentRowIndex].isConsistent = null;
+            comparisonResults[currentRowIndex].showMemoInput = true; // Show input when marking as hard
+            
+            renderCurrentRow();
+            updateStats();
+            
+            // Auto-focus the memo input
+            setTimeout(() => {
+                const memoInput = document.getElementById('memoInput');
+                if (memoInput) {
+                    memoInput.focus();
+                }
+            }, 100);
+        }
+
+        function backToPending() {
+            const oldState = JSON.parse(JSON.stringify(comparisonResults[currentRowIndex]));
+            correctionHistory.push({ index: currentRowIndex, oldState: oldState });
+            
+            comparisonResults[currentRowIndex].status = 'pending';
+            comparisonResults[currentRowIndex].isConsistent = null;
+            comparisonResults[currentRowIndex].correction = null;
+            comparisonResults[currentRowIndex].memo = null;
+            
+            renderCurrentRow();
+            updateStats();
+        }
+
+        function saveCorrection() {
+            const input = document.getElementById('correctionInput');
+            if (input) {
+                const oldState = JSON.parse(JSON.stringify(comparisonResults[currentRowIndex]));
+                correctionHistory.push({ index: currentRowIndex, oldState: oldState });
+                
+                comparisonResults[currentRowIndex].correction = input.value.trim();
+                comparisonResults[currentRowIndex].showCorrectionInput = false; // Hide input after saving
+                
+                renderCurrentRow();
+                updateStats();
+                
+                // Auto advance to next pending row after correction
+                setTimeout(() => {
+                    const nextPending = comparisonResults.findIndex((r, i) => 
+                        i > currentRowIndex && (r.status === 'pending')
+                    );
+                    if (nextPending !== -1) {
+                        currentRowIndex = nextPending;
+                        renderCurrentRow();
+                        updateStats();
+                    }
+                }, 500);
+            }
+        }
+
+        function saveMemo() {
+            const input = document.getElementById('memoInput');
+            if (input) {
+                const oldState = JSON.parse(JSON.stringify(comparisonResults[currentRowIndex]));
+                correctionHistory.push({ index: currentRowIndex, oldState: oldState });
+                
+                comparisonResults[currentRowIndex].memo = input.value.trim();
+                comparisonResults[currentRowIndex].showMemoInput = false; // Hide input after saving
+                
+                renderCurrentRow();
+                updateStats();
+                
+                // Auto advance to next pending row after memo
+                setTimeout(() => {
+                    const nextPending = comparisonResults.findIndex((r, i) => 
+                        i > currentRowIndex && r.status === 'pending'
+                    );
+                    if (nextPending !== -1) {
+                        currentRowIndex = nextPending;
+                        renderCurrentRow();
+                        updateStats();
+                    }
+                }, 500);
+            }
+        }
+
+        function clearCorrection() {
+            const input = document.getElementById('correctionInput');
+            if (input) {
+                input.value = comparisonResults[currentRowIndex].source.text;
+            }
+        }
+
+        function clearMemo() {
+            const input = document.getElementById('memoInput');
+            if (input) {
+                input.value = '';
+            }
+        }
+
+        function undoLastCorrection() {
+            if (correctionHistory.length > 0) {
+                const lastAction = correctionHistory.pop();
+                comparisonResults[lastAction.index] = lastAction.oldState;
+                
+                if (currentRowIndex !== lastAction.index) {
+                    currentRowIndex = lastAction.index;
+                }
+                
+                renderCurrentRow();
+                updateStats();
+            } else {
+                alert('No actions to undo!');
+            }
+        }
+
+        function updateCurrentPosition() {
+            const positionElement = document.getElementById('currentPosition');
+            if (positionElement) {
+                positionElement.textContent = `Row ${currentRowIndex + 1} of ${comparisonResults.length}`;
+            }
+        }
+
+        function updateStats() {
+            const total = comparisonResults.length;
+            const consistent = comparisonResults.filter(r => r.status === 'consistent').length;
+            const inconsistent = comparisonResults.filter(r => r.status === 'inconsistent').length;
+            const hard = comparisonResults.filter(r => r.status === 'hard').length;
+            const corrected = comparisonResults.filter(r => r.status === 'inconsistent' && r.correction && r.correction.trim()).length;
+            const pending = comparisonResults.filter(r => r.status === 'pending').length;
+            const processed = total - pending;
+
+            document.getElementById('totalRows').textContent = total;
+            document.getElementById('consistentCount').textContent = consistent;
+            document.getElementById('inconsistentCount').textContent = inconsistent;
+            document.getElementById('hardCount').textContent = hard;
+            document.getElementById('correctedCount').textContent = corrected;
+            document.getElementById('processedCount').textContent = processed;
+
+            // Update progress bar
+            const progress = (processed / total) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        function exportResults() {
+            try {
+                let csvContent = 'Index,Target_ID,Target_Text,Source_ID,Source_Text,Status,Correction,Memo\n';
+                
+                comparisonResults.forEach((result, index) => {
+                    const row = [
+                        index + 1,
+                        `"${result.target.id || ''}"`,
+                        `"${result.target.text || ''}"`,
+                        `"${result.source.id || ''}"`,
+                        `"${result.source.text || ''}"`,
+                        result.status,
+                        `"${result.correction || ''}"`,
+                        `"${result.memo || ''}"`
+                    ].join(',');
+                    csvContent += row + '\n';
+                });
+
+                // Method 1: Try direct download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (link.download !== undefined) {
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'segmentation_comparison_results.csv';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    alert('Export successful! Check your Downloads folder for: segmentation_comparison_results.csv');
+                } else {
+                    // Fallback method - open in new window
+                    const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+                    const newWindow = window.open(dataUri, '_blank');
+                    if (newWindow) {
+                        alert('CSV content opened in new window. Please save manually using Ctrl+S or Cmd+S');
+                    } else {
+                        // Final fallback - show content
+                        showExportModal(csvContent);
+                    }
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Export failed. Please check the console for details or try copying the data manually.');
+                showExportModal(csvContent);
+            }
+        }
+
+        function showExportModal(csvContent) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 8px; max-width: 80%; max-height: 80%; overflow: auto;">
+                    <h3>Export Data (Copy and Save Manually)</h3>
+                    <p>Copy the content below and save it as a .csv file:</p>
+                    <textarea style="width: 100%; height: 300px; font-family: monospace;" readonly>${csvContent}</textarea>
+                    <div style="margin-top: 10px;">
+                        <button onclick="navigator.clipboard.writeText('${csvContent.replace(/'/g, "\\'")}'); alert('Copied to clipboard!');" style="padding: 10px; margin-right: 10px;">Copy to Clipboard</button>
+                        <button onclick="document.body.removeChild(this.parentElement.parentElement.parentElement)" style="padding: 10px;">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger shortcuts if user is typing in an input field
+            const activeElement = document.activeElement;
+            const isTyping = activeElement && (
+                activeElement.tagName === 'TEXTAREA' || 
+                activeElement.tagName === 'INPUT' ||
+                activeElement.contentEditable === 'true'
+            );
+            
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                // Cancel editing if in edit mode
+                if (comparisonResults[currentRowIndex]?.showCorrectionInput) {
+                    hideCorrectionInput();
+                } else if (comparisonResults[currentRowIndex]?.showMemoInput) {
+                    hideMemoInput();
+                }
+                return;
+            }
+            
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        previousRow();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        nextRow();
+                        break;
+                    case 'z':
+                        e.preventDefault();
+                        undoLastCorrection();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        // Save correction or memo based on current status
+                        if (comparisonResults[currentRowIndex]?.status === 'inconsistent') {
+                            saveCorrection();
+                        } else if (comparisonResults[currentRowIndex]?.status === 'hard') {
+                            saveMemo();
+                        }
+                        break;
+                }
+            } else if (!isTyping) {
+                // Only trigger Y/N/H/R shortcuts when NOT typing in input fields
+                switch(e.key.toLowerCase()) {
+                    case 'y':
+                        e.preventDefault();
+                        if (comparisonResults[currentRowIndex]) {
+                            markConsistent();
+                        }
+                        break;
+                    case 'n':
+                        e.preventDefault();
+                        if (comparisonResults[currentRowIndex]) {
+                            markInconsistent();
+                        }
+                        break;
+                    case 'h':
+                        e.preventDefault();
+                        if (comparisonResults[currentRowIndex]) {
+                            markHardToDecide();
+                        }
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        // Revise correction or memo based on current status
+                        if (comparisonResults[currentRowIndex]?.status === 'inconsistent' && !comparisonResults[currentRowIndex]?.showCorrectionInput) {
+                            showCorrectionInput();
+                        } else if (comparisonResults[currentRowIndex]?.status === 'hard' && !comparisonResults[currentRowIndex]?.showMemoInput) {
+                            showMemoInput();
+                        }
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

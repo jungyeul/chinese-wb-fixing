@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotation Review Interface</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .upload-area {
+            text-align: center;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 48px;
+            background-color: #f9fafb;
+            margin-bottom: 24px;
+        }
+        
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            opacity: 0.6;
+        }
+        
+        .upload-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .upload-button:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #2563eb;
+            transition: width 0.3s ease;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        .text-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .text-box {
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+        
+        .target-text {
+            background-color: #ecfdf5;
+            border-color: #bbf7d0;
+        }
+        
+        .source-text {
+            background-color: #eff6ff;
+            border-color: #bfdbfe;
+        }
+        
+        .annotations-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .annotation-card {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 16px;
+            background-color: white;
+            transition: background-color 0.2s;
+        }
+        
+        .annotation-card:hover {
+            background-color: #f9fafb;
+        }
+        
+        .annotation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .annotator-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .status-badge {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .status-consistent {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-corrected {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-other {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        
+        .adopt-button {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        
+        .adopt-button:hover {
+            background-color: #bfdbfe;
+        }
+        
+        .diff-viewer {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .diff-title {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .diff-added {
+            background-color: #bbf7d0;
+            color: #166534;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+        
+        .diff-deleted {
+            background-color: #fecaca;
+            color: #dc2626;
+            padding: 1px 2px;
+            border-radius: 2px;
+            text-decoration: line-through;
+        }
+        
+        .custom-correction {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 16px;
+            background-color: white;
+        }
+        
+        .custom-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px;
+            color: #6b7280;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .custom-button:hover {
+            color: #374151;
+        }
+        
+        .custom-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        
+        .custom-textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            padding: 8px 16px;
+            background-color: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background-color: #15803d;
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            padding: 8px 16px;
+            background-color: #d1d5db;
+            color: #374151;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #9ca3af;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            padding-top: 16px;
+        }
+        
+        .btn-skip {
+            flex: 1;
+            padding: 8px 16px;
+            background-color: #e5e7eb;
+            color: #374151;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-skip:hover {
+            background-color: #d1d5db;
+        }
+        
+        .btn-nav {
+            padding: 8px 16px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-nav:hover:not(:disabled) {
+            background-color: #bfdbfe;
+        }
+        
+        .btn-nav:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .decision-status {
+            margin-top: 16px;
+            padding: 12px;
+            background-color: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+        }
+        
+        .decision-text {
+            font-size: 14px;
+            color: #166534;
+        }
+        
+        .export-button {
+            padding: 8px 16px;
+            background-color: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        
+        .export-button:hover {
+            background-color: #15803d;
+        }
+        
+        .status-text {
+            margin-top: 16px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="uploadSection">
+            <div class="upload-area">
+                <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3 style="font-size: 18px; font-weight: 500; margin-bottom: 8px;">Upload Annotation Comparison Results</h3>
+                <p style="color: #6b7280; margin-bottom: 24px;">Upload your Excel file containing inconsistent annotations to start the review process</p>
+                <label class="upload-button">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                    </svg>
+                    Choose File
+                    <input type="file" accept=".xlsx,.xls" id="fileInput" class="hidden">
+                </label>
+                <div id="uploadStatus" class="status-text"></div>
+            </div>
+        </div>
+
+        <div id="reviewSection" class="hidden">
+            <div class="header">
+                <div>
+                    <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 16px;">Annotation Review Interface</h1>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <span id="progressText" style="font-size: 14px; color: #6b7280;"></span>
+                        <span id="rowInfo" style="font-size: 14px; color: #6b7280; font-weight: 500;"></span>
+                        <button id="exportButton" class="export-button">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" />
+                            </svg>
+                            Export Results
+                        </button>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressBar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-grid">
+                <div class="text-panel">
+                    <div class="text-box target-text">
+                        <h3 style="font-weight: 600; color: #166534; margin-bottom: 8px;" id="targetTitle">Target Text</h3>
+                        <div style="font-size: 12px; color: #059669; margin-bottom: 8px;" id="targetRowInfo"></div>
+                        <p id="targetText" style="color: #374151;"></p>
+                    </div>
+                    
+                    <div class="text-box source-text">
+                        <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 8px;" id="sourceTitle">Source Text</h3>
+                        <div style="font-size: 12px; color: #2563eb; margin-bottom: 8px;" id="sourceRowInfo"></div>
+                        <p id="sourceText" style="color: #374151;"></p>
+                    </div>
+                </div>
+
+                <div class="annotations-panel">
+                    <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 8px;">Conflicting Annotations</h3>
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 16px; line-height: 1.4;">
+                        <strong>Keyboard shortcuts:</strong> ← → (navigate) | 1,2,3 (adopt) | S (skip) | C (custom) | Esc (cancel) | Ctrl+Enter (save custom)
+                    </div>
+                    
+                    <div id="annotator1" class="annotation-card">
+                        <div class="annotation-header">
+                            <div class="annotator-info">
+                                <h4 style="font-weight: 500; color: #374151;">Annotator A</h4>
+                                <span id="status1" class="status-badge"></span>
+                            </div>
+                            <button class="adopt-button" onclick="adoptCorrection('annotator1')">
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                </svg>
+                                Adopt
+                            </button>
+                        </div>
+                        <div id="diff1" class="diff-viewer"></div>
+                    </div>
+
+                    <div id="annotator2" class="annotation-card">
+                        <div class="annotation-header">
+                            <div class="annotator-info">
+                                <h4 style="font-weight: 500; color: #374151;">Annotator B</h4>
+                                <span id="status2" class="status-badge"></span>
+                            </div>
+                            <button class="adopt-button" onclick="adoptCorrection('annotator2')">
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                </svg>
+                                Adopt
+                            </button>
+                        </div>
+                        <div id="diff2" class="diff-viewer"></div>
+                    </div>
+
+                    <div id="annotator3" class="annotation-card">
+                        <div class="annotation-header">
+                            <div class="annotator-info">
+                                <h4 style="font-weight: 500; color: #374151;">Annotator C</h4>
+                                <span id="status3" class="status-badge"></span>
+                            </div>
+                            <button class="adopt-button" onclick="adoptCorrection('annotator3')">
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                </svg>
+                                Adopt
+                            </button>
+                        </div>
+                        <div id="diff3" class="diff-viewer"></div>
+                    </div>
+
+                    <div class="custom-correction">
+                        <div id="customButton">
+                            <button class="custom-button" onclick="showCustomInput()">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                </svg>
+                                Provide Custom Correction
+                            </button>
+                        </div>
+                        <div id="customInput" class="hidden">
+                            <h4 style="font-weight: 500; color: #374151; margin-bottom: 8px;">Custom Correction</h4>
+                            <textarea id="customTextarea" class="custom-textarea" rows="3" placeholder="Enter your custom correction..."></textarea>
+                            <div class="button-group">
+                                <button id="saveCustom" class="btn-primary" onclick="saveCustomCorrection()" disabled>
+                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" />
+                                    </svg>
+                                    Save
+                                </button>
+                                <button class="btn-secondary" onclick="hideCustomInput()">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-skip" onclick="skipCurrent()">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M4,5V19L11,12M18,5V19H20V5M11,5V19L18,12" />
+                            </svg>
+                            Skip for Now
+                        </button>
+                        <button id="prevButton" class="btn-nav" onclick="previousItem()">Previous</button>
+                        <button id="nextButton" class="btn-nav" onclick="nextItem()">Next</button>
+                    </div>
+
+                    <div id="decisionStatus" class="decision-status hidden">
+                        <p id="decisionText" class="decision-text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let data = [];
+        let currentIndex = 0;
+        let decisions = {};
+
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+        document.getElementById('customTextarea').addEventListener('input', function() {
+            const saveButton = document.getElementById('saveCustom');
+            saveButton.disabled = !this.value.trim();
+        });
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const statusElement = document.getElementById('uploadStatus');
+            statusElement.textContent = 'Processing file...';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    const processedData = jsonData.map((row, index) => ({
+                        id: row['Index'] || index,
+                        originalRowNumber: index + 2, // +2 because Excel rows start at 1 and there's usually a header
+                        targetId: row['Target_ID'] || '',
+                        sourceId: row['Source_ID'] || '',
+                        sourceText: row['Source_Text'] || '',
+                        targetText: row['Target_Text'] || '',
+                        annotator1: {
+                            name: 'Annotator A',
+                            status: row['Status_annotator_a'] || '',
+                            correction: row['Correction_annotator_a'] || ''
+                        },
+                        annotator2: {
+                            name: 'Annotator B',
+                            status: row['Status_annotator_b'] || '',
+                            correction: row['Correction_annotator_b'] || ''
+                        },
+                        annotator3: {
+                            name: 'Annotator C',
+                            status: row['Status_annotator_c'] || '',
+                            correction: row['Correction_annotator_c'] || ''
+                        }
+                    }));
+
+                    data = processedData;
+                    currentIndex = 0;
+                    decisions = {};
+                    
+                    document.getElementById('uploadSection').classList.add('hidden');
+                    document.getElementById('reviewSection').classList.remove('hidden');
+                    
+                    statusElement.textContent = `Loaded ${processedData.length} annotations`;
+                    updateDisplay();
+                } catch (error) {
+                    statusElement.textContent = 'Error processing file. Please check the format.';
+                    console.error('File processing error:', error);
+                }
+            };
+            reader.readAsBinaryString(file);
+        }
+
+        function createDiff(original, corrected) {
+            if (!original || !corrected) return null;
+            
+            const originalWords = original.split(' ');
+            const correctedWords = corrected.split(' ');
+            
+            const result = [];
+            let i = 0, j = 0;
+            
+            while (i < originalWords.length || j < correctedWords.length) {
+                if (i >= originalWords.length) {
+                    result.push({ type: 'added', text: correctedWords[j] });
+                    j++;
+                } else if (j >= correctedWords.length) {
+                    result.push({ type: 'deleted', text: originalWords[i] });
+                    i++;
+                } else if (originalWords[i] === correctedWords[j]) {
+                    result.push({ type: 'unchanged', text: originalWords[i] });
+                    i++;
+                    j++;
+                } else {
+                    let foundMatch = false;
+                    
+                    for (let k = i + 1; k < Math.min(i + 3, originalWords.length); k++) {
+                        if (originalWords[k] === correctedWords[j]) {
+                            result.push({ type: 'deleted', text: originalWords[i] });
+                            i++;
+                            foundMatch = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!foundMatch) {
+                        for (let k = j + 1; k < Math.min(j + 3, correctedWords.length); k++) {
+                            if (correctedWords[k] === originalWords[i]) {
+                                result.push({ type: 'added', text: correctedWords[j] });
+                                j++;
+                                foundMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!foundMatch) {
+                        result.push({ type: 'deleted', text: originalWords[i] });
+                        result.push({ type: 'added', text: correctedWords[j] });
+                        i++;
+                        j++;
+                    }
+                }
+            }
+            
+            return result;
+        }
+
+        function renderDiff(original, corrected, containerId) {
+            const container = document.getElementById(containerId);
+            const diff = createDiff(original, corrected);
+            
+            if (!diff) {
+                container.innerHTML = `
+                    <div class="diff-title">Changes from Source Text:</div>
+                    <div style="color: #6b7280; font-style: italic; font-size: 14px;">No correction provided</div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="diff-title">Changes from Source Text:</div><div>';
+            diff.forEach((item, index) => {
+                const spanClass = item.type === 'added' ? 'diff-added' : 
+                                item.type === 'deleted' ? 'diff-deleted' : '';
+                html += `<span class="${spanClass}">${item.text}</span>`;
+                if (index < diff.length - 1) html += ' ';
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function updateDisplay() {
+            if (data.length === 0) return;
+            
+            const currentItem = data[currentIndex];
+            const progress = ((currentIndex + 1) / data.length) * 100;
+            
+            document.getElementById('progressText').textContent = `${currentIndex + 1} of ${data.length}`;
+            document.getElementById('rowInfo').textContent = `Row: ${currentItem.id} | Excel Row: ${currentItem.originalRowNumber}`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            document.getElementById('targetTitle').textContent = `Target Text (ID: ${currentItem.targetId})`;
+            document.getElementById('targetRowInfo').textContent = `Row: ${currentItem.id}`;
+            document.getElementById('targetText').textContent = currentItem.targetText;
+            document.getElementById('sourceTitle').textContent = `Source Text (ID: ${currentItem.sourceId})`;
+            document.getElementById('sourceRowInfo').textContent = `Row: ${currentItem.id}`;
+            document.getElementById('sourceText').textContent = currentItem.sourceText;
+            
+            // Update annotator statuses and diffs
+            updateAnnotator(1, currentItem.annotator1, currentItem.sourceText);
+            updateAnnotator(2, currentItem.annotator2, currentItem.sourceText);
+            updateAnnotator(3, currentItem.annotator3, currentItem.sourceText);
+            
+            // Update navigation buttons
+            document.getElementById('prevButton').disabled = currentIndex === 0;
+            document.getElementById('nextButton').disabled = currentIndex === data.length - 1;
+            
+            // Update decision status
+            const decision = decisions[currentItem.id];
+            const statusElement = document.getElementById('decisionStatus');
+            if (decision) {
+                statusElement.classList.remove('hidden');
+                let decisionText = `Decision: ${decision.decision === 'custom' ? 'Custom Correction' : `Adopted ${decision.decision}`}`;
+                if (decision.value) {
+                    decisionText += `<br><strong>Value:</strong> ${decision.value}`;
+                }
+                document.getElementById('decisionText').innerHTML = decisionText;
+            } else {
+                statusElement.classList.add('hidden');
+            }
+        }
+
+        function updateAnnotator(num, annotator, sourceText) {
+            const statusElement = document.getElementById(`status${num}`);
+            statusElement.textContent = annotator.status;
+            statusElement.className = `status-badge ${
+                annotator.status === 'consistent' ? 'status-consistent' : 
+                annotator.status === 'corrected' ? 'status-corrected' : 
+                'status-other'
+            }`;
+            
+            renderDiff(sourceText, annotator.correction, `diff${num}`);
+        }
+
+        function makeDecision(decision, value = null) {
+            const currentItem = data[currentIndex];
+            decisions[currentItem.id] = {
+                decision,
+                value,
+                timestamp: new Date().toISOString()
+            };
+            
+            hideCustomInput();
+            
+            if (currentIndex < data.length - 1) {
+                currentIndex++;
+                updateDisplay();
+            } else {
+                updateDisplay();
+            }
+        }
+
+        function adoptCorrection(annotator) {
+            const currentItem = data[currentIndex];
+            let correction = '';
+            
+            if (annotator === 'annotator1') correction = currentItem.annotator1.correction;
+            else if (annotator === 'annotator2') correction = currentItem.annotator2.correction;
+            else if (annotator === 'annotator3') correction = currentItem.annotator3.correction;
+            
+            makeDecision(annotator, correction);
+        }
+
+        function showCustomInput() {
+            document.getElementById('customButton').classList.add('hidden');
+            document.getElementById('customInput').classList.remove('hidden');
+        }
+
+        function hideCustomInput() {
+            document.getElementById('customButton').classList.remove('hidden');
+            document.getElementById('customInput').classList.add('hidden');
+            document.getElementById('customTextarea').value = '';
+            document.getElementById('saveCustom').disabled = true;
+        }
+
+        function saveCustomCorrection() {
+            const customText = document.getElementById('customTextarea').value.trim();
+            if (customText) {
+                makeDecision('custom', customText);
+            }
+        }
+
+        function skipCurrent() {
+            makeDecision('skip');
+        }
+
+        function previousItem() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            }
+        }
+
+        function nextItem() {
+            if (currentIndex < data.length - 1) {
+                currentIndex++;
+                updateDisplay();
+            }
+        }
+
+        document.getElementById('exportButton').addEventListener('click', function() {
+            const results = data.map(item => ({
+                'Original_Excel_Row': item.originalRowNumber,
+                'Index': item.id,
+                'Target_ID': item.targetId,
+                'Target_Text': item.targetText,
+                'Source_ID': item.sourceId,
+                'Source_Text': item.sourceText,
+                'Status_annotator_a': item.annotator1.status,
+                'Correction_annotator_a': item.annotator1.correction,
+                'Status_annotator_b': item.annotator2.status,
+                'Correction_annotator_b': item.annotator2.correction,
+                'Status_annotator_c': item.annotator3.status,
+                'Correction_annotator_c': item.annotator3.correction,
+                'Final_Decision': decisions[item.id]?.decision || 'Pending',
+                'Final_Correction': decisions[item.id]?.value || '',
+                'Review_Date': decisions[item.id]?.timestamp || ''
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(results);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Review Results');
+            XLSX.writeFile(wb, 'annotation_review_results.xlsx');
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Only handle shortcuts when not typing in textarea
+            if (event.target.tagName === 'TEXTAREA') return;
+            
+            switch(event.key) {
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    previousItem();
+                    break;
+                case 'ArrowRight':
+                    event.preventDefault();
+                    nextItem();
+                    break;
+                case '1':
+                    event.preventDefault();
+                    adoptCorrection('annotator1');
+                    break;
+                case '2':
+                    event.preventDefault();
+                    adoptCorrection('annotator2');
+                    break;
+                case '3':
+                    event.preventDefault();
+                    adoptCorrection('annotator3');
+                    break;
+                case 's':
+                case 'S':
+                    event.preventDefault();
+                    skipCurrent();
+                    break;
+                case 'c':
+                case 'C':
+                    event.preventDefault();
+                    if (document.getElementById('customButton').classList.contains('hidden')) {
+                        hideCustomInput();
+                    } else {
+                        showCustomInput();
+                        // Focus on textarea after showing
+                        setTimeout(() => {
+                            document.getElementById('customTextarea').focus();
+                        }, 100);
+                    }
+                    break;
+                case 'Escape':
+                    event.preventDefault();
+                    hideCustomInput();
+                    break;
+                case 'Enter':
+                    if (event.ctrlKey || event.metaKey) {
+                        event.preventDefault();
+                        const saveButton = document.getElementById('saveCustom');
+                        if (!saveButton.disabled) {
+                            saveCustomCorrection();
+                        }
+                    }
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

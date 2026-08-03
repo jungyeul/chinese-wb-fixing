@@ -1,0 +1,6 @@
+Method,Code,Projection_CSV,Eva_CSV,Original_Source
+IBM2,projection_code/make_IBM2_projection.py,csv/IBM2_projection.csv,eva/eva_IBM2.csv,inputs/learners_three_outputs_add_ibm_only.csv; model source: 0211验证ibm train learners/model_learner_ibm2_tables_target_only.pkl
+LTP,projection_code/make_LTP_projection.py,csv/LTP_projection.csv,eva/eva_LTP.csv,inputs/three_outputs_learners_charpairs_textcols.csv
+Levenshtein,projection_code/make_Levenshtein_projection.py,csv/Levenshtein_projection.csv,eva/eva_Levenshtein.csv,inputs/three_outputs_learners_charpairs_textcols.csv
+step1,projection_code/make_step1_projection.py,csv/step1_projection.csv,eva/eva_step1.csv,inputs/three_outputs_learners_charpairs_textcols.csv
+step2,projection_code/make_step2_projection.py,csv/step2_projection.csv,eva/eva_step2.csv,inputs/learner_corpus.csv; inputs/triplet_no_dup_threshold.csv

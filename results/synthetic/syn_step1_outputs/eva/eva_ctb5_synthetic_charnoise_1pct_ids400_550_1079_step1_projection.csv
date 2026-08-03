@@ -1,0 +1,2 @@
+﻿Dataset,Method,Gold_Token_Count,Pred_Token_Count,Correct_Token_Count,Token_Precision,Token_Recall,Token_F1,Gold_Sentence_Count,Pred_Sentence_Count,Correct_Sentence_Count,Sentence_Precision,Sentence_Recall,Sentence_F1
+ctb5_synthetic_charnoise_1pct_ids400_550_1079_step1_projection,Projected_Source,29522,29553,29172,0.9871079078266166,0.9881444346588985,0.9876258992805755,1079,1079,1079,1.0,1.0,1.0
